@@ -87,14 +87,13 @@
     border:1px solid #cfcfcf;position:relative;
   }
   /* quarter marks so short fills stay legible */
-  .row .track::after{
-    content:"";position:absolute;inset:0;pointer-events:none;
-    background:repeating-linear-gradient(to right,
-      transparent 0 calc(25% - 1px), #c4c4c4 calc(25% - 1px) 25%);
+    .row .track{
+    display:block;background:var(--track);height:22px;border-radius:3px;
+    overflow:hidden;border:1px solid #cfcfcf;
   }
   .row .fill{
-    height:100%;background:var(--brand);transition:width .35s ease;
-    min-width:3px;position:relative;z-index:1;
+    display:block;height:100%;background:var(--brand);
+    transition:width .35s ease;min-width:3px;
   }
   .row .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
   .row .v b{font-weight:700;font-size:15.5px}
@@ -217,6 +216,7 @@
     document.getElementById("note").innerHTML =
       `<b>${RINGS.find(r => r.key === active).short}</b>&nbsp;&mdash; ` +
       RINGS.find(r => r.key === active).note +
+    
       ` Percentages are the share of the Santa Cruz County total for each resource.`;
   }
 
