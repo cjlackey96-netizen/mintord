@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ecological Resources by Deposition Distance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --ink:#000000;
+    --ink-3:#777777;
+    --line:#e6e6e6;
+    --line-2:#c8c8c8;
+    --head:#f7f7f7;
+    --hover:#f2f7fb;
+    --brand:#3d8fc9;
+    --brand-soft:#e8f2f9;
+    --track:#dedede;
+  }
+  *,*::before,*::after{box-sizing:inherit}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+
+  body{
+    margin:0;background:#ffffff;color:#000000;
+    font-family:"Nunito Sans","Avenir Next","Avenir",
+                system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---- distance selector (one at a time) ---- */
+  .selector{
+    padding:12px 18px;
+    border-bottom:1px solid var(--line);
+    background:var(--head);
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .selector .lab{
+    font-size:12px;font-weight:600;color:#000;
+    text-transform:uppercase;letter-spacing:.4px;
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;
+    border:1px solid var(--line-2);
+    background:#ffffff;color:#000000;
+    padding:6px 13px;font-size:14px;cursor:pointer;
+    user-select:none;border-radius:3px;
+    transition:background .12s,border-color .12s;
+  }
+  .chip:hover{border-color:var(--brand)}
+  .chip input{accent-color:var(--brand);margin:0;width:14px;height:14px}
+  .chip.on{background:var(--brand-soft);border-color:var(--brand);font-weight:600}
+
+  /* ---- top three donuts ---- */
+  .top3{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--line);border-bottom:1px solid var(--line);
+  }
+  .donut{
+    background:#fff;padding:16px 10px 18px;text-align:center;
+  }
+  .donut svg{display:block;margin:0 auto 6px}
+  .donut .pct{
+    font-size:19px;font-weight:700;fill:#000;
+  }
+  .donut .nm{font-size:14px;line-height:1.35}
+  .donut .nm b{font-weight:700}
+  .donut .amt{font-size:12px;color:var(--ink-3);margin-top:3px}
+
+  /* ---- remaining as bars ---- */
+  .rows{padding:2px 0 0}
+  .row{
+    display:grid;grid-template-columns:1fr 150px 92px;
+    align-items:center;gap:12px;
+    padding:11px 18px;border-bottom:1px solid var(--line);
+    font-size:14.5px;
+  }
+  .row:hover{background:var(--hover)}
+  .row .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row .track{
+    background:var(--track);height:13px;border-radius:2px;overflow:hidden;
+  }
+  .row .fill{height:100%;background:var(--brand);transition:width .35s ease}
+  .row .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .row .v b{font-weight:700}
+  .row .v span{color:var(--ink-3);font-size:12.5px;display:block;line-height:1.3}
+
+  .note{
+    padding:11px 18px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--ink-3);line-height:1.6;background:var(--head);
+  }
+  .note b{color:#000000;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="selector">
+  <span class="lab">Distance from site</span>
+  <div class="chips" id="chips"></div>
+</div>
+
+<div class="top3" id="top3"></div>
+<div id="wrap"></div>
+
+<div class="note" id="note"></div>
+
+<script>
+(function(){
+
+  const RINGS = [
+    {key:"c06", short:"0.6 mi",
+     note:"Inner edge of peak cathode-metal deposition after the January 2025 Moss Landing battery fire (Aiello et al. 2025, ~1 km)."},
+    {key:"c19", short:"1.9 mi",
+     note:"Furthest observed ash and battery fragments after the January 2025 Moss Landing fire (Aiello et al. 2025, ~3 km). This was the limit of sampling, not a boundary where deposition stopped."},
+    {key:"c35", short:"3.5 mi",
+     note:"Shown for comparison with the evacuation analysis (Monterey County PAZ tier 3). Not an ecological finding."},
+  ];
+
+  const ROWS = [
+    {name:"Lakes", unit:"acres", county:1543,
+     c06:[178.5,11.57], c19:[449.8,29.16], c35:[563.5,36.53]},
+    {name:"Important Farmland (FMMP)", unit:"acres", county:38691,
+     c06:[910.7,2.35], c19:[4411.1,11.40], c35:[12773.5,33.01]},
+    {name:"Agricultural Resource Area", unit:"acres", county:63857,
+     c06:[1072.0,1.68], c19:[5569.6,8.72], c35:[17443.2,27.32]},
+    {name:"Riparian Woodlands", unit:"acres", county:2606,
+     c06:[2.0,0.08], c19:[208.8,8.01], c35:[404.5,15.52]},
+    {name:"Potential Riparian & Wetlands", unit:"acres", county:14177,
+     c06:[285.7,2.02], c19:[979.2,6.91], c35:[1933.9,13.64]},
+    {name:"Streams", unit:"miles", county:910,
+     c06:[4.9,0.54], c19:[23.8,2.62], c35:[77.5,8.52]},
+    {name:"Fish-Bearing Streams", unit:"miles", county:282,
+     c06:[1.1,0.40], c19:[8.4,2.98], c35:[21.0,7.45]},
+    {name:"Mapped Biotic Resources", unit:"acres", county:102915,
+     c06:[193.0,0.19], c19:[2341.6,2.28], c35:[7772.8,7.55]},
+  ];
+
+  let active = "c35";
+
+  const chips = document.getElementById("chips");
+  chips.innerHTML = RINGS.map(r => `
+    <label class="chip${r.key === active ? " on" : ""}" data-k="${r.key}">
+      <input type="radio" name="ring" ${r.key === active ? "checked" : ""}>
+      <span>${r.short}</span>
+    </label>`).join("");
+
+  chips.querySelectorAll(".chip").forEach(el => {
+    el.querySelector("input").addEventListener("change", () => {
+      active = el.dataset.k;
+      chips.querySelectorAll(".chip").forEach(c =>
+        c.classList.toggle("on", c.dataset.k === active));
+      render();
+    });
+  });
+
+  const fmt = n => n.toLocaleString(undefined,
+                   {minimumFractionDigits:n < 100 ? 1 : 0,
+                    maximumFractionDigits:n < 100 ? 1 : 0});
+
+  function donut(pct){
+    const R = 34, C = 2 * Math.PI * R;
+    const dash = C * Math.min(pct,100) / 100;
+    return `<svg width="94" height="94" viewBox="0 0 94 94">
+      <circle cx="47" cy="47" r="${R}" fill="none"
+              stroke="var(--track)" stroke-width="11"/>
+      <circle cx="47" cy="47" r="${R}" fill="none"
+              stroke="var(--brand)" stroke-width="11"
+              stroke-dasharray="${dash.toFixed(2)} ${(C-dash).toFixed(2)}"
+              stroke-dashoffset="${(C/4).toFixed(2)}"
+              stroke-linecap="butt"/>
+      <text class="pct" x="47" y="53" text-anchor="middle">${pct.toFixed(0)}%</text>
+    </svg>`;
+  }
+
+  function render(){
+    const sorted = [...ROWS].sort((a,b) => b[active][1] - a[active][1]);
+    const top = sorted.slice(0,3), rest = sorted.slice(3);
+
+    document.getElementById("top3").innerHTML = top.map(r => {
+      const [amt,pct] = r[active];
+      return `<div class="donut">
+                ${donut(pct)}
+                <div class="nm">of Santa Cruz County's<br><b>${r.name}</b></div>
+                <div class="amt">${fmt(amt)} ${r.unit}</div>
+              </div>`;
+    }).join("");
+
+    const max = rest.length ? rest[0][active][1] : 1;
+    document.getElementById("wrap").innerHTML =
+      '<div class="rows">' + rest.map(r => {
+        const [amt,pct] = r[active];
+        return `<div class="row">
+                  <span class="nm">${r.name}</span>
+                  <span class="track">
+                    <span class="fill" style="width:${Math.min(pct,100)}%"></span>
+                  </span>
+                  <span class="v"><b>${pct.toFixed(1)}%</b>
+                    <span>${fmt(amt)} ${r.unit}</span></span>
+                </div>`;
+      }).join("") + "</div>";
+
+    document.getElementById("note").innerHTML =
+      `<b>${RINGS.find(r => r.key === active).short}</b>&nbsp;&mdash; ` +
+      RINGS.find(r => r.key === active).note +
+      ` Percentages are the share of the Santa Cruz County total for each resource.`;
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
