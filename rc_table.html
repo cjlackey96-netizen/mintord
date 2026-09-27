@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sensitive Receptors by Buffer Distance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+     COLORS — change any value here and it updates everywhere.
+
+     --brand       main accent: selected chip border, checkboxes
+     --brand-soft  pale tint: selected chip background
+     --head        grey strip behind the chips and header row
+     --line        thin cell borders
+     --line-2      heavy borders (header underline, total row)
+     --hover       row hover tint
+     --ink         main text
+     --ink-3       grey text used for zero values
+
+     DATA — the numbers live in the ROWS array in the script
+     below, one line per facility type.
+     ========================================================= */
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --bg:#ffffff;
+    --ink:#000000;
+    --ink-2:#000000;
+    --ink-3:#777777;
+    --line:#e6e6e6;
+    --line-2:#c8c8c8;
+    --head:#f7f7f7;
+    --hover:#f2f7fb;
+    --brand:#3d8fc9;
+    --brand-soft:#e8f2f9;
+  }
+  *,*::before,*::after{box-sizing:inherit}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+
+  body{
+    margin:0;background:#ffffff;color:#000000;
+    font-family:"Nunito Sans","Avenir Next","Avenir",
+                system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    font-weight:400;-webkit-font-smoothing:antialiased;
+  }
+
+  /* ---- buffer selector ---- */
+  .selector{
+    padding:14px 18px;
+    border-bottom:1px solid var(--line);
+    background:var(--head);
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    display:inline-flex;align-items:center;gap:8px;
+    border:1px solid var(--line-2);
+    background:var(--bg);color:var(--ink-2);
+    padding:7px 14px;font-size:15px;cursor:pointer;
+    user-select:none;border-radius:3px;
+    transition:background .12s,border-color .12s,color .12s;
+  }
+  .chip:hover{border-color:var(--brand)}
+  .chip input{accent-color:var(--brand);margin:0;width:15px;height:15px}
+  .chip.on{
+    background:var(--brand-soft);
+    border-color:var(--brand);
+    color:var(--ink);
+    font-weight:600;
+  }
+
+  /* ---- table ---- */
+  .tablewrap{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;min-width:min-content}
+  thead th:first-child,tbody td:first-child{width:1%;padding-right:34px}
+  thead th{
+    background:var(--head);
+    color:var(--ink);
+    font-weight:700;
+    font-size:17px;
+    text-align:center;
+    padding:16px 22px;
+    border-bottom:2px solid var(--line-2);
+    border-right:1px solid var(--line);
+    white-space:nowrap;
+  }
+  thead th:first-child{text-align:left}
+  thead th:last-child{border-right:none}
+
+  tbody td{
+    padding:17px 22px;
+    border-bottom:1px solid var(--line);
+    border-right:1px solid var(--line);
+    text-align:right;
+    font-size:17px;
+    font-weight:400;
+    color:var(--ink);
+    font-variant-numeric:tabular-nums;
+    white-space:nowrap;
+  }
+  tbody td:first-child{text-align:left}
+  tbody td:last-child{border-right:none}
+  tbody tr:hover td{background:var(--hover)}
+
+  tbody tr.total td{
+    font-weight:700;
+    border-top:2px solid var(--line-2);
+    border-bottom:2px solid var(--line-2);
+  }
+  tbody tr.sep td{border-top:2px solid var(--line-2)}
+
+  .zero{color:var(--ink-3)}
+  .empty{padding:40px;text-align:center;color:var(--ink-3);font-size:16px}
+</style>
+</head>
+<body>
+
+<div class="selector">
+  <div class="chips" id="chips"></div>
+</div>
+
+<div class="tablewrap" id="wrap"></div>
+
+<script>
+(function(){
+
+  const RINGS = [
+    {key:"r1000", short:"1,000 ft"},
+    {key:"r033",  short:"0.33 mi"},
+    {key:"r1",    short:"1 mi"},
+    {key:"r175",  short:"1.75 mi"},
+    {key:"r2",    short:"2 mi"},
+    {key:"r35",   short:"3.5 mi"},
+  ];
+
+  const ROWS = [
+    {name:"Schools",                r1000:0,   r033:0,   r1:6,     r175:14,    r2:22,     r35:41},
+    {name:"Childcare",              r1000:0,   r033:0,   r1:0,     r175:6,     r2:9,      r35:16},
+    {name:"Clinics",                r1000:0,   r033:0,   r1:3,     r175:6,     r2:7,      r35:13},
+    {name:"Rest / nursing / group", r1000:1,   r033:1,   r1:4,     r175:8,     r2:15,     r35:21},
+    {name:"Adult residential",      r1000:0,   r033:0,   r1:0,     r175:2,     r2:6,      r35:13},
+    {name:"All facilities",         r1000:1,   r033:1,   r1:13,    r175:36,    r2:59,     r35:104, total:true},
+    {name:"Dwelling units (est.)",  r1000:187, r033:366, r1:1530,  r175:7268,  r2:10068,  r35:17246, sep:true},
+    {name:"Mobile home parks",      r1000:0,   r033:0,   r1:2,     r175:6,     r2:6,      r35:10},
+  ];
+
+  const on = new Set(["r1000","r175","r2","r35"]);
+
+  const chips = document.getElementById("chips");
+  chips.innerHTML = RINGS.map(r => `
+    <label class="chip${on.has(r.key) ? " on" : ""}" data-k="${r.key}">
+      <input type="checkbox" ${on.has(r.key) ? "checked" : ""}>
+      <span>${r.short}</span>
+    </label>`).join("");
+
+  chips.querySelectorAll(".chip").forEach(el => {
+    const k = el.dataset.k;
+    el.querySelector("input").addEventListener("change", e => {
+      e.target.checked ? on.add(k) : on.delete(k);
+      el.classList.toggle("on", e.target.checked);
+      render();
+    });
+  });
+
+  const fmt = n => n.toLocaleString();
+
+  function render(){
+    const cols = RINGS.filter(r => on.has(r.key));
+    const wrap = document.getElementById("wrap");
+
+    if(!cols.length){
+      wrap.innerHTML = `<div class="empty">Select at least one buffer distance.</div>`;
+      return;
+    }
+
+    let h = "<table><thead><tr><th>Facility</th>";
+    cols.forEach(c => { h += `<th>${c.short}</th>`; });
+    h += "</tr></thead><tbody>";
+
+    ROWS.forEach(row => {
+      const cls = [row.total ? "total" : "", row.sep ? "sep" : ""]
+                  .filter(Boolean).join(" ");
+      h += `<tr${cls ? ` class="${cls}"` : ""}><td>${row.name}</td>`;
+      cols.forEach(c => {
+        const v = row[c.key];
+        h += `<td${v === 0 ? ' class="zero"' : ""}>${fmt(v)}</td>`;
+      });
+      h += "</tr>";
+    });
+
+    h += "</tbody></table>";
+    wrap.innerHTML = h;
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
