@@ -90,12 +90,16 @@
     background:var(--brand-soft);border-color:var(--brand);color:var(--brand);
   }
 
-  .note{
-    padding:12px 18px;border-top:1px solid var(--line);
-    font-size:12.5px;color:var(--ink-3);line-height:1.7;background:var(--head);
+    .note{
+    position:absolute;top:56px;right:18px;z-index:20;
+    width:330px;max-width:calc(100vw - 36px);
+    padding:14px 16px;border:1px solid var(--line-2);border-radius:4px;
+    background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.18);
+    font-size:12.5px;color:var(--ink-3);line-height:1.7;
   }
   .note b{color:#000000;font-weight:600}
   .note[hidden]{display:none}
+  body{position:relative}
 
   /* tooltip on the chips */
   .chip{position:relative}
@@ -170,8 +174,6 @@
 
 <div class="tablehead" id="tablehead"></div>
 <div class="tablewrap" id="wrap"></div>
-
-<div class="note" id="note" hidden></div>
 
 <script>
 (function(){
