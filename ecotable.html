@@ -56,6 +56,11 @@
   .chip input{accent-color:var(--brand);margin:0;width:14px;height:14px}
   .chip.on{background:var(--brand-soft);border-color:var(--brand);font-weight:600}
 
+
+    .top3head{
+    padding:11px 18px 9px;font-size:14px;font-weight:600;
+    border-bottom:1px solid var(--line);
+  }
   /* ---- top three donuts ---- */
   .top3{
     display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
@@ -83,7 +88,6 @@
   .row:hover{background:var(--hover)}
   .row .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   
-  /* quarter marks so short fills stay legible */
     .row .track{
     display:block;background:var(--track);height:22px;border-radius:3px;
     overflow:hidden;border:1px solid #cfcfcf;
@@ -110,6 +114,7 @@
   <div class="chips" id="chips"></div>
 </div>
 
+  <div class="top3head" id="top3head"></div>
 <div class="top3" id="top3"></div>
 <div id="wrap"></div>
 
@@ -210,14 +215,21 @@
                 </div>`;
       }).join("") + "</div>";
 
-    document.getElementById("note").innerHTML =
-      `<b>${RINGS.find(r => r.key === active).short}</b>&nbsp;&mdash; ` +
-      RINGS.find(r => r.key === active).note +
-    
-      ` Percentages are the share of the Santa Cruz County total for each resource.`;
-  }
+    const ringLabel = RINGS.find(r => r.key === active).short;
+    document.getElementById("top3head").textContent =
+      `Share of Santa Cruz County's total within ${ringLabel} of the site`;
 
+    document.getElementById("top3").innerHTML = top.map(r => {
+      const [amt,pct] = r[active];
+      return `<div class="donut">
+                ${donut(pct)}
+                <div class="nm"><b>${r.name}</b></div>
+                <div class="amt">${fmt(amt)} ${r.unit}</div>
+              </div>`;
+    }).join("");
+  }
   render();
+       
 })();
 </script>
 </body>
