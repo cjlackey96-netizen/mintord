@@ -34,9 +34,9 @@
     --line:#e6e6e6;
     --line-2:#c8c8c8;
     --head:#f7f7f7;
-   --brand:#c0392b;      /* red accent: selected chip border, checkboxes */
---brand-soft:#fdeceb; /* pale red: selected chip background */
---hover:#fdf5f4;      /* faint red row hover */
+    --hover:#fdf5f4;
+    --brand:#c0392b;
+    --brand-soft:#fdeceb;
   }
   *,*::before,*::after{box-sizing:inherit}
   html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -71,6 +71,17 @@
     color:var(--ink);
     font-weight:600;
   }
+
+  .tablehead{
+    padding:11px 18px 9px;font-size:14px;font-weight:600;
+    border-bottom:1px solid var(--line);
+  }
+
+  .note{
+    padding:11px 18px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--ink-3);line-height:1.7;background:var(--head);
+  }
+  .note b{color:#000000;font-weight:600}
 
   /* ---- table ---- */
   .tablewrap{overflow-x:auto}
@@ -122,18 +133,27 @@
   <div class="chips" id="chips"></div>
 </div>
 
+<div class="tablehead" id="tablehead"></div>
 <div class="tablewrap" id="wrap"></div>
+
+<div class="note" id="note"></div>
 
 <script>
 (function(){
 
   const RINGS = [
-    {key:"r1000", short:"1,000 ft"},
-    {key:"r033",  short:"0.33 mi"},
-    {key:"r1",    short:"1 mi"},
-    {key:"r175",  short:"1.75 mi"},
-    {key:"r2",    short:"2 mi"},
-    {key:"r35",   short:"3.5 mi"},
+    {key:"r1000", short:"1,000 ft",
+     src:"New Leaf's own parcel notification radius for the project site."},
+    {key:"r033",  short:"0.33 mi",
+     src:"Shelter-in-place order, September 2026 Moss Landing incident."},
+    {key:"r1",    short:"1 mi",
+     src:"New Leaf's primary local study area for land use, noise and visual resources."},
+    {key:"r175",  short:"1.75 mi",
+     src:"Monterey County Protective Action Zone tier 2 for the Moss Landing facility."},
+    {key:"r2",    short:"2 mi",
+     src:"New Leaf's alternatives study radius."},
+    {key:"r35",   short:"3.5 mi",
+     src:"Monterey County PAZ tier 3. The January 2025 Moss Landing evacuation reached 3.4 mi."},
   ];
 
   const ROWS = [
@@ -193,6 +213,15 @@
 
     h += "</tbody></table>";
     wrap.innerHTML = h;
+
+    const list = cols.map(c => c.short);
+    const phrase = list.length === 1 ? list[0]
+                 : list.slice(0,-1).join(", ") + " and " + list[list.length-1];
+    document.getElementById("tablehead").textContent =
+      `Count within ${phrase} of 90 Minto Rd`;
+
+    document.getElementById("note").innerHTML =
+      cols.map(c => `<b>${c.short}</b>&nbsp;&mdash; ${c.src}`).join("<br>");
   }
 
   render();
