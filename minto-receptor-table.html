@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sensitive Receptors by Buffer Distance — 90 Minto Rd</title>
+<style>
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --bg:#ffffff;
+    --ink:#1b2430;
+    --ink-soft:#5d6a78;
+    --line:#dfe4ea;
+    --line-strong:#b9c2cc;
+    --head:#f2f5f8;
+    --accent:#c0504d;
+    --hover:#f7fafc;
+  }
+  *,*::before,*::after{box-sizing:inherit}
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#131b24;--ink:#e8eef4;--ink-soft:#9aa7b5;--line:#2b3742;
+      --line-strong:#3d4b59;--head:#1a242f;
+      --hover:#1c2630;
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#131b24;--ink:#e8eef4;--ink-soft:#9aa7b5;--line:#2b3742;
+    --line-strong:#3d4b59;--head:#1a242f;--hover:#1c2630;
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);line-height:1.45;
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:16px;
+  }
+
+  h1{font-size:1rem;margin:0 0 3px;font-weight:600}
+  .sub{font-size:.78rem;color:var(--ink-soft);margin-bottom:14px}
+
+  /* ---- buffer chooser ---- */
+  .chooser{
+    border:1px solid var(--line);border-radius:10px;
+    padding:11px 13px;margin-bottom:14px;background:var(--head);
+  }
+  .chooser .lab{
+    font-size:.7rem;text-transform:uppercase;letter-spacing:.6px;
+    color:var(--ink-soft);font-weight:700;margin-bottom:8px;
+  }
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{
+    display:inline-flex;align-items:center;gap:7px;
+    border:1px solid var(--line-strong);border-radius:999px;
+    padding:6px 12px;font-size:.82rem;cursor:pointer;
+    background:var(--bg);color:var(--ink);user-select:none;
+    transition:background .15s,border-color .15s,color .15s;
+  }
+  .chip:hover{background:var(--hover)}
+  .chip input{accent-color:var(--accent);margin:0;width:14px;height:14px}
+  .chip.on{
+    background:color-mix(in srgb,var(--accent) 12%,var(--bg));
+    border-color:var(--accent);
+  }
+  .chip .why{color:var(--ink-soft);font-size:.74rem}
+  .chip.on .why{color:var(--ink)}
+
+  .hint{font-size:.72rem;color:var(--ink-soft);margin-top:8px}
+
+  /* ---- table ---- */
+  .tablewrap{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:.86rem;min-width:min-content}
+  th,td{padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+  thead th{
+    background:var(--head);font-size:.74rem;text-transform:uppercase;
+    letter-spacing:.4px;color:var(--ink-soft);font-weight:700;
+    border-bottom:2px solid var(--line-strong);text-align:right;
+  }
+  thead th:first-child{text-align:left}
+  tbody td{text-align:right;font-variant-numeric:tabular-nums}
+  tbody td:first-child{text-align:left;color:var(--ink)}
+  tbody tr:hover{background:var(--hover)}
+  tbody tr.total td{
+    font-weight:700;border-top:2px solid var(--line-strong);
+    border-bottom:2px solid var(--line-strong);
+  }
+  tbody tr.sep td{padding-top:16px}
+  .zero{color:var(--ink-soft)}
+  .empty{
+    padding:26px;text-align:center;color:var(--ink-soft);font-size:.85rem;
+  }
+
+  footer{
+    margin-top:14px;font-size:.72rem;color:var(--ink-soft);
+    border-top:1px solid var(--line);padding-top:10px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Sensitive receptors by buffer distance</h1>
+<div class="sub">90 Minto Rd, Watsonville · APN 051-101-77 &amp; 051-101-78 · distances measured from the property boundary</div>
+
+<div class="chooser">
+  <div class="lab">Buffer distances</div>
+  <div class="chips" id="chips"></div>
+  <div class="hint">Each distance has a documented source — select any combination to compare.</div>
+</div>
+
+<div class="tablewrap" id="wrap"></div>
+
+<footer id="foot"></footer>
+
+<script>
+(function(){
+
+  // ---- the data ----
+  const RINGS = [
+    {key:"r1000", short:"1,000 ft", why:"applicant notification radius",
+     src:"New Leaf project-site parcel notification radius"},
+    {key:"r033",  short:"0.33 mi",  why:"shelter in place",
+     src:"Shelter-in-place order, September 2026 Moss Landing incident"},
+    {key:"r1",    short:"1 mi",     why:"applicant study area",
+     src:"New Leaf primary local study area (land use, noise, visual)"},
+    {key:"r175",  short:"1.75 mi",  why:"county protective action",
+     src:"Monterey County Protective Action Zone tier 2, Moss Landing"},
+    {key:"r2",    short:"2 mi",     why:"applicant alternatives",
+     src:"New Leaf alternatives study radius"},
+    {key:"r35",   short:"3.5 mi",   why:"evacuation maximum",
+     src:"Monterey County PAZ tier 3; actual Jan 2025 Moss Landing evacuation reached 3.4 mi"},
+  ];
+
+  const ROWS = [
+    {name:"Schools",               r1000:0,   r033:0,   r1:6,     r175:14,    r2:22,     r35:41},
+    {name:"Childcare",             r1000:0,   r033:0,   r1:0,     r175:6,     r2:9,      r35:16},
+    {name:"Clinics",               r1000:0,   r033:0,   r1:3,     r175:6,     r2:7,      r35:13},
+    {name:"Rest / nursing / group",r1000:1,   r033:1,   r1:4,     r175:8,     r2:15,     r35:21},
+    {name:"Adult residential",     r1000:0,   r033:0,   r1:0,     r175:2,     r2:6,      r35:13},
+    {name:"All facilities",        r1000:1,   r033:1,   r1:13,    r175:36,    r2:59,     r35:104, total:true},
+    {name:"Dwelling units (est.)", r1000:187, r033:366, r1:1530,  r175:7268,  r2:10068,  r35:17246, sep:true},
+    {name:"Mobile home parks",     r1000:0,   r033:0,   r1:2,     r175:6,     r2:6,      r35:10},
+  ];
+
+  const DEFAULT_ON = ["r1000","r175","r2","r35"];
+  const on = new Set(DEFAULT_ON);
+
+  // ---- chips ----
+  const chips = document.getElementById("chips");
+  chips.innerHTML = RINGS.map(r => `
+    <label class="chip${on.has(r.key) ? " on" : ""}" data-k="${r.key}" title="${r.src}">
+      <input type="checkbox" ${on.has(r.key) ? "checked" : ""}>
+      <span><b>${r.short}</b> <span class="why">${r.why}</span></span>
+    </label>`).join("");
+
+  chips.querySelectorAll(".chip").forEach(el => {
+    const k = el.dataset.k;
+    el.querySelector("input").addEventListener("change", e => {
+      e.target.checked ? on.add(k) : on.delete(k);
+      el.classList.toggle("on", e.target.checked);
+      render();
+    });
+  });
+
+  // ---- table ----
+  const fmt = n => n.toLocaleString();
+
+  function render(){
+    const cols = RINGS.filter(r => on.has(r.key));
+    const wrap = document.getElementById("wrap");
+
+    if(!cols.length){
+      wrap.innerHTML = `<div class="empty">Select at least one buffer distance.</div>`;
+      document.getElementById("foot").textContent = "";
+      return;
+    }
+
+    let h = "<table><thead><tr><th>Facility type</th>";
+    cols.forEach(c => { h += `<th title="${c.src}">${c.short}</th>`; });
+    h += "</tr></thead><tbody>";
+
+    ROWS.forEach(row => {
+      const cls = [row.total ? "total" : "", row.sep ? "sep" : ""]
+                  .filter(Boolean).join(" ");
+      h += `<tr${cls ? ` class="${cls}"` : ""}><td>${row.name}</td>`;
+      cols.forEach(c => {
+        const v = row[c.key];
+        h += `<td${v === 0 ? ' class="zero"' : ""}>${fmt(v)}</td>`;
+      });
+      h += "</tr>";
+    });
+
+    h += "</tbody></table>";
+    wrap.innerHTML = h;
+
+    document.getElementById("foot").innerHTML =
+      cols.map(c => `<b>${c.short}</b> — ${c.src}`).join("<br>");
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
