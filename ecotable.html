@@ -75,19 +75,29 @@
   /* ---- remaining as bars ---- */
   .rows{padding:2px 0 0}
   .row{
-    display:grid;grid-template-columns:1fr 150px 92px;
-    align-items:center;gap:12px;
+    display:grid;grid-template-columns:210px 1fr 96px;
+    align-items:center;gap:16px;
     padding:11px 18px;border-bottom:1px solid var(--line);
     font-size:14.5px;
   }
   .row:hover{background:var(--hover)}
   .row .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .row .track{
-    background:var(--track);height:13px;border-radius:2px;overflow:hidden;
+    background:var(--track);height:22px;border-radius:3px;overflow:hidden;
+    border:1px solid #cfcfcf;position:relative;
   }
-  .row .fill{height:100%;background:var(--brand);transition:width .35s ease}
+  /* quarter marks so short fills stay legible */
+  .row .track::after{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:repeating-linear-gradient(to right,
+      transparent 0 calc(25% - 1px), #c4c4c4 calc(25% - 1px) 25%);
+  }
+  .row .fill{
+    height:100%;background:var(--brand);transition:width .35s ease;
+    min-width:3px;position:relative;z-index:1;
+  }
   .row .v{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .row .v b{font-weight:700}
+  .row .v b{font-weight:700;font-size:15.5px}
   .row .v span{color:var(--ink-3);font-size:12.5px;display:block;line-height:1.3}
 
   .note{
