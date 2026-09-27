@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Population Demographics — 90 Minto Rd</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+     COLORS — change any value here and it updates everywhere.
+
+     --site        bars for the 3.5 mi study area
+     --county      bars for Santa Cruz County
+     --track       grey behind the bars
+     --line        thin dividers
+     --head        grey strip behind headings
+     --ink-3       grey secondary text
+
+     DATA — the ROWS array in the script below. Each line is
+     one measure with [study area value, county value].
+     ========================================================= */
+  :root{
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+    --ink:#000000;
+    --ink-3:#777777;
+    --line:#e6e6e6;
+    --line-2:#c8c8c8;
+    --head:#f7f7f7;
+    --hover:#fdf5f4;
+    --site:#c0392b;
+    --county:#9aa5ad;
+    --track:#ededed;
+  }
+  *,*::before,*::after{box-sizing:inherit}
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+
+  body{
+    margin:0;background:#ffffff;color:#000000;
+    font-family:"Nunito Sans","Avenir Next","Avenir",
+                system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ---- key ---- */
+  .key{
+    padding:12px 18px;background:var(--head);
+    border-bottom:1px solid var(--line);
+    display:flex;gap:20px;flex-wrap:wrap;align-items:center;
+    font-size:13.5px;
+  }
+  .key span{display:inline-flex;align-items:center;gap:7px}
+  .key i{width:14px;height:14px;border-radius:2px;display:inline-block}
+
+  /* ---- headline stats ---- */
+  .stats{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:1px;
+    background:var(--line);border-bottom:1px solid var(--line);
+  }
+  .stat{background:#fff;padding:13px 16px}
+  .stat .lab{font-size:12px;color:var(--ink-3);margin-bottom:5px}
+  .stat .pair{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .stat .a{font-size:20px;font-weight:700;color:var(--site)}
+  .stat .b{font-size:14px;color:var(--ink-3)}
+
+  /* ---- paired bars ---- */
+  .rows{padding:2px 0 0}
+  .row{
+    display:grid;grid-template-columns:215px 1fr;
+    align-items:center;gap:18px;
+    padding:11px 18px;border-bottom:1px solid var(--line);
+  }
+  .row:hover{background:var(--hover)}
+  .row .nm{font-size:14.5px}
+  .pair{display:flex;flex-direction:column;gap:5px}
+  .bar{display:grid;grid-template-columns:1fr 62px;align-items:center;gap:10px}
+  .bar .track{
+    display:block;background:var(--track);height:17px;border-radius:2px;
+    overflow:hidden;border:1px solid #dcdcdc;
+  }
+  .bar .fill{display:block;height:100%;transition:width .35s ease;min-width:2px}
+  .bar .v{
+    text-align:right;font-variant-numeric:tabular-nums;
+    font-size:13.5px;font-weight:600;white-space:nowrap;
+  }
+  .bar.county .v{color:var(--ink-3);font-weight:400}
+
+  .note{
+    padding:12px 18px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--ink-3);line-height:1.7;background:var(--head);
+  }
+  .note b{color:#000;font-weight:600}
+</style>
+</head>
+<body>
+
+<div class="key">
+  <span><i style="background:var(--site)"></i> Within 3.5 mi of 90 Minto Rd</span>
+  <span><i style="background:var(--county)"></i> Santa Cruz County</span>
+</div>
+
+<div class="stats" id="stats"></div>
+<div id="wrap"></div>
+
+<div class="note">
+  <b>3.5 mi</b>&nbsp;&mdash; Monterey County Protective Action Zone tier 3;
+  the January 2025 Moss Landing evacuation reached 3.4 mi.
+  Source: Esri 2026 estimates and ACS 5-year data via ArcGIS GeoEnrichment.
+  Rings measured from the parcel centroid.
+</div>
+
+<script>
+(function(){
+
+  // headline figures that aren't percentages
+  const STATS = [
+    {lab:"Total population",        a:"69,963",  b:"266,441 countywide"},
+    {lab:"Average household size",  a:"3.56",    b:"2.61 countywide"},
+    {lab:"Median household income", a:"$87,175", b:"$114,404 countywide"},
+  ];
+
+  // [study area %, county %]
+  const ROWS = [
+    {name:"Hispanic / Latino",             a:80.3, b:35.6},
+    {name:"Households with a disability",  a:31.5, b:24.4},
+    {name:"Children under 14",             a:20.0, b:14.0},
+    {name:"Households receiving SNAP",     a:19.1, b:10.0},
+    {name:"Households below poverty",      a:16.1, b:11.3},
+    {name:"Seniors 65+",                   a:13.9, b:20.6},
+    {name:"Spanish-only speakers (18–64)", a: 8.4, b: 2.3},
+    {name:"Spanish-only speakers (65+)",   a: 2.2, b: 0.6},
+  ];
+
+  document.getElementById("stats").innerHTML = STATS.map(s => `
+    <div class="stat">
+      <div class="lab">${s.lab}</div>
+      <div class="pair"><span class="a">${s.a}</span>
+      <span class="b">${s.b}</span></div>
+    </div>`).join("");
+
+  const max = Math.max(...ROWS.flatMap(r => [r.a, r.b]));
+
+  document.getElementById("wrap").innerHTML =
+    '<div class="rows">' + ROWS.map(r => `
+      <div class="row">
+        <span class="nm">${r.name}</span>
+        <span class="pair">
+          <span class="bar">
+            <span class="track">
+              <span class="fill" style="width:${r.a / max * 100}%;
+                    background:var(--site)"></span>
+            </span>
+            <span class="v">${r.a.toFixed(1)}%</span>
+          </span>
+          <span class="bar county">
+            <span class="track">
+              <span class="fill" style="width:${r.b / max * 100}%;
+                    background:var(--county)"></span>
+            </span>
+            <span class="v">${r.b.toFixed(1)}%</span>
+          </span>
+        </span>
+      </div>`).join("") + "</div>";
+})();
+</script>
+</body>
+</html>
