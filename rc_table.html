@@ -166,11 +166,12 @@
 </head>
 <body>
 
-<div class="selector" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-  <div class="chips" id="chips"></div>
-  <button class="infobtn" id="infobtn" type="button"
-          aria-expanded="false" aria-controls="note"
-          title="About these distances">i</button>
+<div class="selector">
+  <div class="chips" id="chips">
+    <button class="infobtn" id="infobtn" type="button"
+            aria-expanded="false" aria-controls="note"
+            title="About these distances">i</button>
+  </div>
 </div>
 <div class="note" id="note" hidden></div>
 
@@ -209,12 +210,12 @@
   const on = new Set(["r1000","r175","r2","r35"]);
 
   const chips = document.getElementById("chips");
-  chips.innerHTML = RINGS.map(r => `
-    <label class="chip${on.has(r.key) ? " on" : ""}" data-k="${r.key}">
+  chips.insertAdjacentHTML("afterbegin", RINGS.map(r => `
+  <label class="chip${on.has(r.key) ? " on" : ""}" data-k="${r.key}">
       <input type="checkbox" ${on.has(r.key) ? "checked" : ""}>
       <span>${r.short}</span>
       <span class="tip">${r.src}</span>
-    </label>`).join("");
+    </label>`).join(""));
 
   chips.querySelectorAll(".chip").forEach(el => {
     const k = el.dataset.k;
