@@ -77,11 +77,43 @@
     border-bottom:1px solid var(--line);
   }
 
+  /* info button + panel */
+  .infobtn{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:26px;height:26px;border-radius:50%;
+    border:1px solid var(--line-2);background:#fff;color:var(--ink);
+    font-size:14px;font-weight:700;cursor:pointer;line-height:1;
+    font-family:Georgia,serif;
+  }
+  .infobtn:hover{border-color:var(--brand);color:var(--brand)}
+  .infobtn[aria-expanded="true"]{
+    background:var(--brand-soft);border-color:var(--brand);color:var(--brand);
+  }
+
   .note{
-    padding:11px 18px;border-top:1px solid var(--line);
-    font-size:12px;color:var(--ink-3);line-height:1.7;background:var(--head);
+    padding:12px 18px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--ink-3);line-height:1.7;background:var(--head);
   }
   .note b{color:#000000;font-weight:600}
+  .note[hidden]{display:none}
+
+  /* tooltip on the chips */
+  .chip{position:relative}
+  .chip .tip{
+    position:absolute;bottom:calc(100% + 8px);left:0;
+    width:260px;padding:9px 11px;border-radius:4px;
+    background:#2b2b2b;color:#fff;font-size:12.5px;font-weight:400;
+    line-height:1.5;opacity:0;visibility:hidden;
+    transition:opacity .12s;pointer-events:none;z-index:10;
+    box-shadow:0 2px 8px rgba(0,0,0,.25);
+  }
+  .chip .tip::after{
+    content:"";position:absolute;top:100%;left:18px;
+    border:6px solid transparent;border-top-color:#2b2b2b;
+  }
+  @media (hover:hover){
+    .chip:hover .tip{opacity:1;visibility:visible}
+  }
 
   /* ---- table ---- */
   .tablewrap{overflow-x:auto}
@@ -129,14 +161,17 @@
 </head>
 <body>
 
-<div class="selector">
+<div class="selector" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
   <div class="chips" id="chips"></div>
+  <button class="infobtn" id="infobtn" type="button"
+          aria-expanded="false" aria-controls="note"
+          title="About these distances">i</button>
 </div>
 
 <div class="tablehead" id="tablehead"></div>
 <div class="tablewrap" id="wrap"></div>
 
-<div class="note" id="note"></div>
+<div class="note" id="note" hidden></div>
 
 <script>
 (function(){
@@ -174,6 +209,7 @@
     <label class="chip${on.has(r.key) ? " on" : ""}" data-k="${r.key}">
       <input type="checkbox" ${on.has(r.key) ? "checked" : ""}>
       <span>${r.short}</span>
+      <span class="tip">${r.src}</span>
     </label>`).join("");
 
   chips.querySelectorAll(".chip").forEach(el => {
@@ -220,9 +256,19 @@
     document.getElementById("tablehead").textContent =
       `Count within ${phrase} of 90 Minto Rd`;
 
-    document.getElementById("note").innerHTML =
-      cols.map(c => `<b>${c.short}</b>&nbsp;&mdash; ${c.src}`).join("<br>");
   }
+
+  // info button: show every distance and its source
+  document.getElementById("note").innerHTML =
+    RINGS.map(c => `<b>${c.short}</b>&nbsp;&mdash; ${c.src}`).join("<br>");
+
+  const btn = document.getElementById("infobtn");
+  btn.addEventListener("click", () => {
+    const note = document.getElementById("note");
+    const open = note.hasAttribute("hidden");
+    note.toggleAttribute("hidden", !open);
+    btn.setAttribute("aria-expanded", open ? "true" : "false");
+  });
 
   render();
 })();
