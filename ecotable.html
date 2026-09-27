@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<!-- don't forget to update link on gis for v= whatever the next number is -->
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -8,6 +10,22 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
+  <style>
+  /* =========================================================
+     COLORS — change any value here and it updates everywhere.
+
+     --brand       main blue: donut arcs, bar fills, selected chip
+     --brand-soft  pale blue: selected chip background
+     --track       grey: unfilled part of bars and donuts
+     --line        row dividers and panel borders
+     --head        grey strip behind the selector and footnote
+     --hover       row hover tint
+     --ink-3       grey secondary text (acreages, footnote)
+
+     DATA — the numbers live in the ROWS array in the script
+     below. Each row is one resource with [amount, percent]
+     for each distance.
+     ========================================================= */
   :root{
     box-sizing:border-box;
     padding-top:env(safe-area-inset-top,0px);
@@ -18,9 +36,9 @@
     --line-2:#c8c8c8;
     --head:#f7f7f7;
     --hover:#f2f7fb;
-    --brand:#3d8fc9;
+    --brand:#42A14D;
     --brand-soft:#e8f2f9;
-    --track:#dedede;
+    --track:#62cc6e;
   }
   *,*::before,*::after{box-sizing:inherit}
   html{scroll-padding-top:env(safe-area-inset-top,0px)}
