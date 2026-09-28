@@ -122,6 +122,22 @@
     font-size:12px;color:var(--ink-3);line-height:1.6;background:var(--head);
   }
   .note b{color:#000000;font-weight:600}
+    .chip{position:relative}
+  .chip .tip{
+    position:absolute;top:calc(100% + 8px);left:0;
+    width:280px;padding:9px 11px;border-radius:4px;
+    background:#2b2b2b;color:#fff;font-size:12.5px;font-weight:400;
+    line-height:1.5;opacity:0;visibility:hidden;
+    transition:opacity .12s;pointer-events:none;z-index:10;
+    box-shadow:0 2px 8px rgba(0,0,0,.25);
+  }
+  .chip .tip::after{
+    content:"";position:absolute;bottom:100%;left:18px;
+    border:6px solid transparent;border-bottom-color:#2b2b2b;
+  }
+  @media (hover:hover){
+    .chip:hover .tip{opacity:1;visibility:visible}
+  }
 </style>
 </head>
 <body>
@@ -173,10 +189,11 @@
   const chips = document.getElementById("chips");
   chips.innerHTML = RINGS.map(r => `
     <label class="chip${r.key === active ? " on" : ""}" data-k="${r.key}">
-      <input type="radio" name="ring" ${r.key === active ? "checked" : ""}>
+            <input type="radio" name="ring" ${r.key === active ? "checked" : ""}>
       <span>${r.short}</span>
+      <span class="tip">${r.note}</span>
     </label>`).join("");
-
+  
   chips.querySelectorAll(".chip").forEach(el => {
     el.querySelector("input").addEventListener("change", () => {
       active = el.dataset.k;
